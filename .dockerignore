@@ -1,0 +1,17 @@
+docker
+Dockerfile
+node_modules
+test
+.vscode
+.env
+data/
+db/
+dbconf/
+dbentry/
+docker/
+demo/
+coverage/
+_backup/
+sonar-project.properties
+.github
+.temp

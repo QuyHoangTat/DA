@@ -1,0 +1,69 @@
+version: "3.0"
+
+services:
+
+  stretchshop:
+    build:
+      context: ../..
+    image: wradgio/stretchshop_demo:latest
+    env_file: docker-compose.env
+    environment:
+      PORT: 3000
+    links:
+        - mongo
+    depends_on:
+        - mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/`)"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+    volumes:
+      - /var/www/html/stretchshop/static:/app/public/assets/data
+      - /var/www/html/stretchshop/app/stretchshop/.temp:/app/.temp
+#      - /etc/letsencrypt/:/etc/letsencrypt
+    networks:
+      - internal
+
+
+  mongo:
+    image: mongo:latest
+    restart: on-failure
+    volumes:
+      - ./db:/data/db
+      - ./dbconf:/etc/mongo
+    ports:
+      - "27017:27017"
+    command: mongod --auth
+    networks:
+      - internal
+
+
+  nats-server:
+    image: nats
+    ports:
+      - "4222:4222"
+    networks:
+      - internal
+
+
+  traefik:
+    image: traefik:latest
+    command:
+      - "--api.insecure=true" # only if you are using nginx or something else to protect the traefik dashboard
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - "3100:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+      - default
+
+
+networks:
+  internal:
+
+volumes:
+  data:
+
